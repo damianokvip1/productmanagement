@@ -55,14 +55,12 @@ namespace ProductManagement.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
+            if (!await _categoryService.DeleteCategoryAsync(id))
             {
-                if (!await _categoryService.DeleteCategoryAsync(id))
-                {
-                    return NotFound();
-                }
-
-                return NoContent();
+                return NotFound();
             }
+
+            return NoContent();
         }
     }
 }
