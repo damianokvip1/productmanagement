@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ProductManagement.Data;
-using ProductManagement.Models;
 using ProductManagement.DTOs;
+using ProductManagement.Services;
 
 namespace ProductManagement.Controllers
 {
@@ -10,103 +8,45 @@ namespace ProductManagement.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ICategoryService _categoryService;
 
-        public CategoriesController(ApplicationDbContext context)
+        public CategoriesController(ICategoryService categoryService)
         {
-            _context = context;
+            _categoryService = categoryService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
         {
-            var categories = await _context.Categories
-                .Select(c => new CategoryDTO
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                })
-                .ToListAsync();
-
-            return categories;
+            var categories = await _categoryService.GetAllCategoriesAsync();
+            return Ok(categories);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<CategoryDTO>> GetCategory(int id)
         {
-            var category = await _context.Categories
-                .Select(c => new CategoryDTO
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                })
-                .FirstOrDefaultAsync(c => c.Id == id);
-
+            var category = await _categoryService.GetCategoryByIdAsync(id);
             if (category == null)
             {
                 return NotFound();
             }
 
-            return category;
+            return Ok(category);
         }
 
         [HttpPost]
         public async Task<ActionResult<CategoryDTO>> PostCategory(CategoryCreateDTO categoryCreateDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var category = new Category
-            {
-                Name = categoryCreateDto.Name
-            };
-
-            _context.Categories.Add(category);
-            await _context.SaveChangesAsync();
-
-            var categoryReturn = new CategoryDTO()
-            {
-                Id = category.Id,
-                Name = categoryCreateDto.Name
-            };
-
-            return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, categoryReturn);
+            var category = await _categoryService.CreateCategoryAsync(categoryCreateDto);
+            return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(int id, CategoryDTO categoryDTO)
+        public async Task<IActionResult> PutCategory(int id, CategoryUpdateDTO categoryUpdateDto)
         {
-            if (id != categoryDTO.Id)
-            {
-                return BadRequest();
-            }
-
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
+            if (!await _categoryService.UpdateCategoryAsync(id, categoryUpdateDto))
             {
                 return NotFound();
-            }
-
-            category.Name = categoryDTO.Name;
-
-            _context.Entry(category).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CategoryExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
             }
 
             return NoContent();
@@ -115,21 +55,14 @@ namespace ProductManagement.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
             {
-                return NotFound();
+                if (!await _categoryService.DeleteCategoryAsync(id))
+                {
+                    return NotFound();
+                }
+
+                return NoContent();
             }
-
-            _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool CategoryExists(int id)
-        {
-            return _context.Categories.Any(e => e.Id == id);
         }
     }
 }

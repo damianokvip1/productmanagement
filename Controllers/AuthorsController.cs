@@ -41,9 +41,9 @@ namespace ProductManagement.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAuthor(int id, AuthorDTO authorDTO)
+        public async Task<IActionResult> PutAuthor(int id, AuthorUpdateDTO authorUpdateDto)
         {
-            if (!await _authorService.UpdateAuthorAsync(id, authorDTO))
+            if (!await _authorService.UpdateAuthorAsync(id, authorUpdateDto))
             {
                 return NotFound();
             }

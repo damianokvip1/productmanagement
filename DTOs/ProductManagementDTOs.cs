@@ -47,6 +47,12 @@ namespace ProductManagement.DTOs
     {
         public string Name { get; set; }
     }
+    
+    public class CategoryUpdateDTO
+    {
+        public string Name { get; set; }
+    }
+    
 
     public class AuthorDTO
     {
@@ -57,6 +63,13 @@ namespace ProductManagement.DTOs
     }
     
     public class AuthorCreateDTO
+    {
+        public string Name { get; set; }
+        public string Biography { get; set; }
+        public DateTime DateOfBirth { get; set; }
+    }
+    
+    public class AuthorUpdateDTO
     {
         public string Name { get; set; }
         public string Biography { get; set; }

@@ -9,7 +9,7 @@ namespace ProductManagement.Services
         Task<IEnumerable<AuthorDTO>> GetAllAuthorsAsync();
         Task<AuthorDTO?> GetAuthorByIdAsync(int id);
         Task<AuthorDTO> CreateAuthorAsync(AuthorCreateDTO authorCreateDto);
-        Task<bool> UpdateAuthorAsync(int id, AuthorDTO authorUpdateDto);
+        Task<bool> UpdateAuthorAsync(int id, AuthorUpdateDTO authorUpdateDto);
         Task<bool> DeleteAuthorAsync(int id);
     }
 
@@ -71,7 +71,7 @@ namespace ProductManagement.Services
             };
         }
 
-        public async Task<bool> UpdateAuthorAsync(int id, AuthorDTO authorUpdateDto)
+        public async Task<bool> UpdateAuthorAsync(int id, AuthorUpdateDTO authorUpdateDto)
         {
             var author = await _authorRepository.GetAuthorByIdAsync(id);
             if (author == null)
