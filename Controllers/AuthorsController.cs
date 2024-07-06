@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ProductManagement.Data;
 using ProductManagement.DTOs;
-using ProductManagement.Models;
+using ProductManagement.Services;
 
 namespace ProductManagement.Controllers
 {
@@ -10,140 +8,58 @@ namespace ProductManagement.Controllers
     [ApiController]
     public class AuthorsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-
-        public AuthorsController(ApplicationDbContext context)
+        private readonly IAuthorService _authorService;
+        public AuthorsController(IAuthorService authorService)
         {
-            _context = context;
+            _authorService = authorService;
         }
 
-        // GET: api/Authors
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AuthorDTO>>> GetAuthors()
         {
-            var authors = await _context.Authors
-                .Select(a => new AuthorDTO
-                {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Biography = a.Biography,
-                    DateOfBirth = a.DateOfBirth
-                })
-                .ToListAsync();
-
-            return authors;
+            var authors = await _authorService.GetAllAuthorsAsync();
+            return Ok(authors);
         }
 
-        // GET: api/Authors/5
         [HttpGet("{id}")]
         public async Task<ActionResult<AuthorDTO>> GetAuthor(int id)
         {
-            var author = await _context.Authors
-                .Select(a => new AuthorDTO
-                {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Biography = a.Biography,
-                    DateOfBirth = a.DateOfBirth
-                })
-                .FirstOrDefaultAsync(a => a.Id == id);
-
+            var author = await _authorService.GetAuthorByIdAsync(id);
             if (author == null)
             {
                 return NotFound();
             }
 
-            return author;
+            return Ok(author);
         }
 
-        // POST: api/Authors
         [HttpPost]
         public async Task<ActionResult<AuthorDTO>> PostAuthor(AuthorCreateDTO authorCreateDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var author = new Author
-            {
-                Name = authorCreateDto.Name,
-                Biography = authorCreateDto.Biography,
-                DateOfBirth = authorCreateDto.DateOfBirth
-            };
-
-            _context.Authors.Add(author);
-            await _context.SaveChangesAsync();
-            var authorReturn = new AuthorDTO
-            {
-                Id = author.Id,
-                Name = authorCreateDto.Name,
-                Biography = authorCreateDto.Biography,
-                DateOfBirth = authorCreateDto.DateOfBirth
-            };
-
-            return CreatedAtAction(nameof(GetAuthor), new { id = author.Id },  authorReturn);
+            var author = await _authorService.CreateAuthorAsync(authorCreateDto);
+            return CreatedAtAction(nameof(GetAuthor), new { id = author.Id }, author);
         }
 
-        // PUT: api/Authors/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAuthor(int id, AuthorDTO authorDTO)
         {
-            if (id != authorDTO.Id)
-            {
-                return BadRequest(new { message = "Id mismatch" });
-            }
-
-            var author = await _context.Authors.FindAsync(id);
-            if (author == null)
-            {
-                return NotFound(new { message = "Author not found" });
-            }
-
-            author.Name = authorDTO.Name;
-            author.Biography = authorDTO.Biography;
-            author.DateOfBirth = authorDTO.DateOfBirth;
-
-            _context.Entry(author).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-                return Ok(new
-                {
-                    message = "Sửa thành công",
-                    author = authorDTO
-                });
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AuthorExists(id))
-                {
-                    return NotFound(new { message = "Author not found" });
-                }
-                throw;
-            }
-        }
-
-        // DELETE: api/Authors/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAuthor(int id)
-        {
-            var author = await _context.Authors.FindAsync(id);
-            if (author == null)
+            if (!await _authorService.UpdateAuthorAsync(id, authorDTO))
             {
                 return NotFound();
             }
-
-            _context.Authors.Remove(author);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool AuthorExists(int id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAuthor(int id)
         {
-            return _context.Authors.Any(e => e.Id == id);
+            if (!await _authorService.DeleteAuthorAsync(id))
+            {
+                return NotFound();
+            }
+
+            return NoContent();
         }
     }
 }
