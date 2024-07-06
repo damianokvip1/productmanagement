@@ -42,10 +42,22 @@ namespace ProductManagement.DTOs
         public int Id { get; set; }
         public string Name { get; set; }
     }
+    
+    public class CategoryCreateDTO
+    {
+        public string Name { get; set; }
+    }
 
     public class AuthorDTO
     {
         public int Id { get; set; }
+        public string Name { get; set; }
+        public string Biography { get; set; }
+        public DateTime DateOfBirth { get; set; }
+    }
+    
+    public class AuthorCreateDTO
+    {
         public string Name { get; set; }
         public string Biography { get; set; }
         public DateTime DateOfBirth { get; set; }

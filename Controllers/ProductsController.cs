@@ -17,7 +17,6 @@ namespace ProductManagement.Controllers
             _context = context;
         }
 
-        // GET: api/Products
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProducts()
         {
@@ -48,7 +47,6 @@ namespace ProductManagement.Controllers
             return products;
         }
 
-        // GET: api/Products/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductDTO>> GetProduct(int id)
         {
@@ -85,7 +83,6 @@ namespace ProductManagement.Controllers
             return productDto;
         }
 
-        // POST: api/Products
         [HttpPost]
         public async Task<ActionResult<ProductDTO>> PostProduct(ProductCreateDTO productDTO)
         {
@@ -134,7 +131,6 @@ namespace ProductManagement.Controllers
             return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, productDto);
         }
 
-        // PUT: api/Products/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduct(int id, ProductUpdateDTO productDTO)
         {
@@ -175,7 +171,6 @@ namespace ProductManagement.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Products/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {

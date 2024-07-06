@@ -2,9 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ProductManagement.Data;
 using ProductManagement.Models;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using ProductManagement.DTOs;
 
 namespace ProductManagement.Controllers
 {
@@ -19,18 +17,30 @@ namespace ProductManagement.Controllers
             _context = context;
         }
 
-        // GET: api/Categories
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
         {
-            return await _context.Categories.ToListAsync();
+            var categories = await _context.Categories
+                .Select(c => new CategoryDTO
+                {
+                    Id = c.Id,
+                    Name = c.Name
+                })
+                .ToListAsync();
+
+            return categories;
         }
 
-        // GET: api/Categories/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Category>> GetCategory(int id)
+        public async Task<ActionResult<CategoryDTO>> GetCategory(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _context.Categories
+                .Select(c => new CategoryDTO
+                {
+                    Id = c.Id,
+                    Name = c.Name
+                })
+                .FirstOrDefaultAsync(c => c.Id == id);
 
             if (category == null)
             {
@@ -40,29 +50,46 @@ namespace ProductManagement.Controllers
             return category;
         }
 
-        // POST: api/Categories
         [HttpPost]
-        public async Task<ActionResult<Category>> PostCategory(Category category)
+        public async Task<ActionResult<CategoryDTO>> PostCategory(CategoryCreateDTO categoryCreateDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
+            var category = new Category
+            {
+                Name = categoryCreateDto.Name
+            };
+
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCategory", new { id = category.Id }, category);
+            var categoryReturn = new CategoryDTO()
+            {
+                Id = category.Id,
+                Name = categoryCreateDto.Name
+            };
+
+            return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, categoryReturn);
         }
 
-        // PUT: api/Categories/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(int id, Category category)
+        public async Task<IActionResult> PutCategory(int id, CategoryDTO categoryDTO)
         {
-            if (id != category.Id)
+            if (id != categoryDTO.Id)
             {
                 return BadRequest();
             }
+
+            var category = await _context.Categories.FindAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            category.Name = categoryDTO.Name;
 
             _context.Entry(category).State = EntityState.Modified;
 
@@ -85,7 +112,6 @@ namespace ProductManagement.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Categories/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {

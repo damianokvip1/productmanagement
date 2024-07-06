@@ -19,138 +19,131 @@ namespace ProductManagement.Controllers
 
         // GET: api/Authors
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Author>>> GetCategories()
+        public async Task<ActionResult<IEnumerable<AuthorDTO>>> GetAuthors()
         {
-            return await _context.Authors.ToListAsync();
-        }
-
-        // GET: Authors/Details/5
-        /*public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var author = await _context.Authors
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (author == null)
-            {
-                return NotFound();
-            }
-
-            return View(author);
-        }
-
-        // GET: Authors/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Authors/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] Author author)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(author);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(author);
-        }
-
-        // GET: Authors/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var author = await _context.Authors.FindAsync(id);
-            if (author == null)
-            {
-                return NotFound();
-            }
-            return View(author);
-        }
-
-        // POST: Authors/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Author author)
-        {
-            if (id != author.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+            var authors = await _context.Authors
+                .Select(a => new AuthorDTO
                 {
-                    _context.Update(author);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!AuthorExists(author.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(author);
+                    Id = a.Id,
+                    Name = a.Name,
+                    Biography = a.Biography,
+                    DateOfBirth = a.DateOfBirth
+                })
+                .ToListAsync();
+
+            return authors;
         }
 
-        // GET: Authors/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // GET: api/Authors/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<AuthorDTO>> GetAuthor(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var author = await _context.Authors
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Select(a => new AuthorDTO
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    Biography = a.Biography,
+                    DateOfBirth = a.DateOfBirth
+                })
+                .FirstOrDefaultAsync(a => a.Id == id);
+
             if (author == null)
             {
                 return NotFound();
             }
 
-            return View(author);
+            return author;
         }
 
-        // POST: Authors/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        // POST: api/Authors
+        [HttpPost]
+        public async Task<ActionResult<AuthorDTO>> PostAuthor(AuthorCreateDTO authorCreateDto)
         {
-            var author = await _context.Authors.FindAsync(id);
-            if (author != null)
+            if (!ModelState.IsValid)
             {
-                _context.Authors.Remove(author);
+                return BadRequest(ModelState);
             }
 
+            var author = new Author
+            {
+                Name = authorCreateDto.Name,
+                Biography = authorCreateDto.Biography,
+                DateOfBirth = authorCreateDto.DateOfBirth
+            };
+
+            _context.Authors.Add(author);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            var authorReturn = new AuthorDTO
+            {
+                Id = author.Id,
+                Name = authorCreateDto.Name,
+                Biography = authorCreateDto.Biography,
+                DateOfBirth = authorCreateDto.DateOfBirth
+            };
+
+            return CreatedAtAction(nameof(GetAuthor), new { id = author.Id },  authorReturn);
+        }
+
+        // PUT: api/Authors/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutAuthor(int id, AuthorDTO authorDTO)
+        {
+            if (id != authorDTO.Id)
+            {
+                return BadRequest(new { message = "Id mismatch" });
+            }
+
+            var author = await _context.Authors.FindAsync(id);
+            if (author == null)
+            {
+                return NotFound(new { message = "Author not found" });
+            }
+
+            author.Name = authorDTO.Name;
+            author.Biography = authorDTO.Biography;
+            author.DateOfBirth = authorDTO.DateOfBirth;
+
+            _context.Entry(author).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok(new
+                {
+                    message = "Sửa thành công",
+                    author = authorDTO
+                });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!AuthorExists(id))
+                {
+                    return NotFound(new { message = "Author not found" });
+                }
+                throw;
+            }
+        }
+
+        // DELETE: api/Authors/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAuthor(int id)
+        {
+            var author = await _context.Authors.FindAsync(id);
+            if (author == null)
+            {
+                return NotFound();
+            }
+
+            _context.Authors.Remove(author);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
 
         private bool AuthorExists(int id)
         {
             return _context.Authors.Any(e => e.Id == id);
-        }*/
+        }
     }
 }
