@@ -13,10 +13,12 @@ public interface IProductRepository
     Task<Product> CreateProductAsync(Product product);
     Task<bool> UpdateProductAsync(Product product);
     Task<bool> DeleteProductAsync(int id);
+    Task<IEnumerable<ProductDTO>> GetProductsCheapestAsync();
 }
 
 public class ProductRepository : IProductRepository
 {
+    const int CHEAPEST_PRODUCTS = 5;
     private readonly ApplicationDbContext _context;
 
     public ProductRepository(ApplicationDbContext context)
@@ -86,57 +88,25 @@ public class ProductRepository : IProductRepository
     
     public async Task<IEnumerable<ProductDTO>> GetProductsFullDataAsync()
     {
-        var productsWithCategoriesAndAuthors = await (
-                from product in _context.Products
-                join category in _context.Categories on product.CategoryId equals category.Id
-                join author in _context.Authors on product.AuthorId equals author.Id
-                select new ProductDTO
-                {
-                    Id = product.Id,
-                    Name = product.Name,
-                    Price = product.Price,
-                    Description = product.Description,
-                    Category = new CategoryDTO
-                    {
-                        Id = category.Id,
-                        Name = category.Name
-                    },
-                    Author = new AuthorDTO()
-                    {
-                        Id = author.Id,
-                        Name = author.Name,
-                        Biography = author.Biography,
-                        DateOfBirth = author.DateOfBirth,
-                    }
-                })
+        var productsWithDetails = await GetProductsDetailsQuery().ToListAsync();
+        return productsWithDetails;
+    }
+    
+    public async Task<IEnumerable<ProductDTO>> GetProductsCheapestAsync()
+    {
+        var cheapestProducts = await GetProductsDetailsQuery()
+            .OrderBy(product => product.Price)
+            .Take(CHEAPEST_PRODUCTS)
             .ToListAsync();
-        
-        var productsWithCategoriesAndAuthors2 = await _context.Products
-            .Join(_context.Categories, product => product.CategoryId, category => category.Id, (product, category) => new { product, category })
-            .Join(_context.Authors, pc => pc.product.AuthorId, author => author.Id, (pc, author) => new ProductDTO
-            {
-                Id = pc.product.Id,
-                Name = pc.product.Name,
-                Price = pc.product.Price,
-                Description = pc.product.Description,
-                Category = new CategoryDTO
-                {
-                    Id = pc.category.Id,
-                    Name = pc.category.Name
-                },
-                Author = new AuthorDTO
-                {
-                    Id = author.Id,
-                    Name = author.Name,
-                    Biography = author.Biography,
-                    DateOfBirth = author.DateOfBirth
-                }
-            })
-            .ToListAsync();
-        
-        var productsWithCategoriesAndAuthors3 = await _context.Products
-            .Include(p => p.Category)  // Include Category navigation property
-            .Include(p => p.Author)    // Include Author navigation property
+
+        return cheapestProducts;
+    }
+    
+    private IQueryable<ProductDTO> GetProductsDetailsQuery()
+    {
+        return _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Author)
             .Select(product => new ProductDTO
             {
                 Id = product.Id,
@@ -155,9 +125,6 @@ public class ProductRepository : IProductRepository
                     Biography = product.Author.Biography,
                     DateOfBirth = product.Author.DateOfBirth
                 }
-            })
-            .ToListAsync();
-
-        return productsWithCategoriesAndAuthors3;
+            });
     }
 }

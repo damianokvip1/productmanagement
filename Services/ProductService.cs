@@ -108,10 +108,8 @@ namespace ProductManagement.Services
 
         public async Task<IEnumerable<ProductDTO>> GetCheapestProductsAsync()
         {
-            var products = await _productRepository.GetProductsFullDataAsync();
-            var cheapestProducts = products
-                .OrderBy(product => product.Price)
-                .Take(2)
+            var cheapestProducts = await _productRepository.GetProductsCheapestAsync();
+            return cheapestProducts
                 .Select(product => new ProductDTO
                 {
                     Id = product.Id,
@@ -131,8 +129,6 @@ namespace ProductManagement.Services
                         DateOfBirth = product.Author.DateOfBirth
                     }
                 });
-
-            return cheapestProducts;
         }
     }
 }
