@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ProductManagement.Data;
 using ProductManagement.DTOs;
 using ProductManagement.Services;
 
@@ -21,6 +20,14 @@ namespace ProductManagement.Controllers
         {
             var products = await _productService.GetAllProductsAsync();
 
+            return Ok(products);
+        }
+        
+        [HttpGet("get-cheapest-products")]
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetCheapestProducts()
+        {
+            var products = await _productService.GetCheapestProductsAsync();
+        
             return Ok(products);
         }
 

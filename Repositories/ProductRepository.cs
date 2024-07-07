@@ -133,7 +133,31 @@ public class ProductRepository : IProductRepository
                 }
             })
             .ToListAsync();
+        
+        var productsWithCategoriesAndAuthors3 = await _context.Products
+            .Include(p => p.Category)  // Include Category navigation property
+            .Include(p => p.Author)    // Include Author navigation property
+            .Select(product => new ProductDTO
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Price = product.Price,
+                Description = product.Description,
+                Category = new CategoryDTO
+                {
+                    Id = product.Category.Id,
+                    Name = product.Category.Name
+                },
+                Author = new AuthorDTO
+                {
+                    Id = product.Author.Id,
+                    Name = product.Author.Name,
+                    Biography = product.Author.Biography,
+                    DateOfBirth = product.Author.DateOfBirth
+                }
+            })
+            .ToListAsync();
 
-        return productsWithCategoriesAndAuthors;
+        return productsWithCategoriesAndAuthors3;
     }
 }

@@ -11,6 +11,7 @@ namespace ProductManagement.Services
         Task<ProductDTO> CreateProductAsync(ProductCreateDTO productCreateDto);
         Task<bool> UpdateProductAsync(int id, ProductUpdateDTO productUpdateDto);
         Task<bool> DeleteProductAsync(int id);
+        Task<IEnumerable<ProductDTO>> GetCheapestProductsAsync();
     }
 
     public class ProductService : IProductService
@@ -103,6 +104,35 @@ namespace ProductManagement.Services
         public async Task<bool> DeleteProductAsync(int id)
         {
             return await _productRepository.DeleteProductAsync(id);
+        }
+
+        public async Task<IEnumerable<ProductDTO>> GetCheapestProductsAsync()
+        {
+            var products = await _productRepository.GetProductsFullDataAsync();
+            var cheapestProducts = products
+                .OrderBy(product => product.Price)
+                .Take(2)
+                .Select(product => new ProductDTO
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Price = product.Price,
+                    Description = product.Description,
+                    Category = new CategoryDTO
+                    {
+                        Id = product.Category.Id,
+                        Name = product.Category.Name
+                    },
+                    Author = new AuthorDTO
+                    {
+                        Id = product.Author.Id,
+                        Name = product.Author.Name,
+                        Biography = product.Author.Biography,
+                        DateOfBirth = product.Author.DateOfBirth
+                    }
+                });
+
+            return cheapestProducts;
         }
     }
 }
