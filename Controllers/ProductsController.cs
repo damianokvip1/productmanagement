@@ -8,6 +8,9 @@ namespace ProductManagement.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
+        private const int PageNumber = 1;
+        private const int PageSize = 10;
+
         private readonly IProductService _productService;
 
         public ProductsController(IProductService productService)
@@ -16,10 +19,14 @@ namespace ProductManagement.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProducts()
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProducts(
+            [FromQuery] int? categoryId,
+            [FromQuery] int? authorId,
+            [FromQuery] string? searchTerm,
+            [FromQuery] int pageNumber = PageNumber,
+            [FromQuery] int pageSize = PageSize)
         {
-            var products = await _productService.GetAllProductsAsync();
-
+            var products = await _productService.GetProductsAsync(categoryId, authorId, searchTerm, pageNumber, pageSize);
             return Ok(products);
         }
         

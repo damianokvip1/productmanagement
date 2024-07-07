@@ -7,7 +7,7 @@ namespace ProductManagement.Repositories;
 
 public interface IProductRepository
 {
-    Task<IEnumerable<Product>> GetProductsAsync();
+    Task<IEnumerable<ProductDTO>> GetProductsAsync(int? categoryId, int? authorId, string? searchTerm, int pageNumber, int pageSize);
     Task<IEnumerable<ProductDTO>> GetProductsFullDataAsync();
     Task<Product?> GetProductByIdAsync(int id);
     Task<Product> CreateProductAsync(Product product);
@@ -18,7 +18,8 @@ public interface IProductRepository
 
 public class ProductRepository : IProductRepository
 {
-    const int CHEAPEST_PRODUCTS = 5;
+    private const int CheapestProducts = 5;
+
     private readonly ApplicationDbContext _context;
 
     public ProductRepository(ApplicationDbContext context)
@@ -26,9 +27,30 @@ public class ProductRepository : IProductRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Product>> GetProductsAsync()
+    public async Task<IEnumerable<ProductDTO>> GetProductsAsync(int? categoryId, int? authorId, string? searchTerm, int pageNumber, int pageSize)
     {
-        return await _context.Products.ToListAsync();
+        var query = GetProductsDetailsQuery();
+
+        if (categoryId.HasValue)
+        {
+            query = query.Where(p => p.Category.Id == categoryId.Value);
+        }
+
+        if (authorId.HasValue)
+        {
+            query = query.Where(p => p.Author.Id == authorId.Value);
+        }
+
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            query = query.Where(p =>
+                p.Name.Contains(searchTerm) ||
+                p.Category.Name.Contains(searchTerm) ||
+                p.Author.Name.Contains(searchTerm));
+        }
+        query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+
+        return await query.ToListAsync();
     }
 
     public async Task<Product?> GetProductByIdAsync(int id)
@@ -96,7 +118,7 @@ public class ProductRepository : IProductRepository
     {
         var cheapestProducts = await GetProductsDetailsQuery()
             .OrderBy(product => product.Price)
-            .Take(CHEAPEST_PRODUCTS)
+            .Take(CheapestProducts)
             .ToListAsync();
 
         return cheapestProducts;

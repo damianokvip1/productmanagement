@@ -6,7 +6,7 @@ namespace ProductManagement.Services
 {
     public interface IProductService
     {
-        Task<IEnumerable<ProductDTO>> GetAllProductsAsync();
+        Task<IEnumerable<ProductDTO>> GetProductsAsync(int? categoryId, int? authorId, string? searchTerm, int pageNumber, int pageSize);
         Task<ProductDTO?> GetProductDetailAsync(int id);
         Task<ProductDTO> CreateProductAsync(ProductCreateDTO productCreateDto);
         Task<bool> UpdateProductAsync(int id, ProductUpdateDTO productUpdateDto);
@@ -23,15 +23,14 @@ namespace ProductManagement.Services
             _productRepository = productRepository;
         }
         
-        public async Task<IEnumerable<ProductDTO>> GetAllProductsAsync()
+        public Task<IEnumerable<ProductDTO>> GetProductsAsync(int? categoryId, int? authorId, string? searchTerm, int pageNumber, int pageSize)
         {
-            var products = await _productRepository.GetProductsFullDataAsync();
-            return products;
+            return _productRepository.GetProductsAsync(categoryId, authorId, searchTerm, pageNumber, pageSize);
         }
 
         public async Task<ProductDTO?> GetProductDetailAsync(int id)
         {
-            var products = await GetAllProductsAsync();
+            var products = await _productRepository.GetProductsFullDataAsync();
             var product = products.FirstOrDefault(p => p.Id == id);
         
             if (product != null)
