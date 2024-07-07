@@ -38,6 +38,10 @@ public class ProductRepository : IProductRepository
     {
         _context.Products.Add(product);
         await _context.SaveChangesAsync();
+
+        await _context.Entry(product).Reference(p => p.Category).LoadAsync();
+        await _context.Entry(product).Reference(p => p.Author).LoadAsync();
+        
         return product;
     }
 

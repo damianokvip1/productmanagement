@@ -14,8 +14,8 @@ namespace ProductManagement.Models
         [StringLength(2000, ErrorMessage = "Description can't be longer than 2000 characters.")]
         public string Description { get; set; }
         [Required]
-        public int CategoryId { get; set; }
-        public Category Category { get; set; }
+        public int CategoryId { get; set; } // Foreign key (optional)
+        public Category Category { get; set; } // Navigation property
         [Required]
         public int AuthorId { get; set; }
         public Author Author { get; set; }
