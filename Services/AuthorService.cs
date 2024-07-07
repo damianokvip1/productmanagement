@@ -13,18 +13,11 @@ namespace ProductManagement.Services
         Task<bool> DeleteAuthorAsync(int id);
     }
 
-    public class AuthorService : IAuthorService
+    public class AuthorService(IAuthorRepository authorRepository) : IAuthorService
     {
-        private readonly IAuthorRepository _authorRepository;
-
-        public AuthorService(IAuthorRepository authorRepository)
-        {
-            _authorRepository = authorRepository;
-        }
-
         public async Task<IEnumerable<AuthorDTO>> GetAllAuthorsAsync()
         {
-            var authors = await _authorRepository.GetAuthorsAsync();
+            var authors = await authorRepository.GetAuthorsAsync();
             return authors.Select(a => new AuthorDTO
             {
                 Id = a.Id,
@@ -36,7 +29,7 @@ namespace ProductManagement.Services
 
         public async Task<AuthorDTO?> GetAuthorByIdAsync(int id)
         {
-            var author = await _authorRepository.GetAuthorByIdAsync(id);
+            var author = await authorRepository.GetAuthorByIdAsync(id);
             if (author == null)
             {
                 return null;
@@ -60,7 +53,7 @@ namespace ProductManagement.Services
                 DateOfBirth = authorCreateDto.DateOfBirth
             };
 
-            await _authorRepository.CreateAuthorAsync(author);
+            await authorRepository.CreateAuthorAsync(author);
 
             return new AuthorDTO
             {
@@ -73,7 +66,7 @@ namespace ProductManagement.Services
 
         public async Task<bool> UpdateAuthorAsync(int id, AuthorUpdateDTO authorUpdateDto)
         {
-            var author = await _authorRepository.GetAuthorByIdAsync(id);
+            var author = await authorRepository.GetAuthorByIdAsync(id);
             if (author == null)
             {
                 return false;
@@ -83,12 +76,12 @@ namespace ProductManagement.Services
             author.Biography = authorUpdateDto.Biography;
             author.DateOfBirth = authorUpdateDto.DateOfBirth;
 
-            return await _authorRepository.UpdateAuthorAsync(author);
+            return await authorRepository.UpdateAuthorAsync(author);
         }
 
         public async Task<bool> DeleteAuthorAsync(int id)
         {
-            return await _authorRepository.DeleteAuthorAsync(id);
+            return await authorRepository.DeleteAuthorAsync(id);
         }
     }
 }

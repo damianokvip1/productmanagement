@@ -2,6 +2,14 @@
 
 namespace ProductManagement.DTOs
 {
+    public class CustomResponseDto
+    {
+        public int StatusCode { get; set; }
+        public bool IsError { get; set; }
+        public string Message { get; set; }
+        public object? Data { get; set; }
+    }
+
     public class ProductCreateDTO
     {
         [Required]
@@ -52,7 +60,6 @@ namespace ProductManagement.DTOs
     {
         public string Name { get; set; }
     }
-    
 
     public class AuthorDTO
     {
@@ -74,5 +81,32 @@ namespace ProductManagement.DTOs
         public string Name { get; set; }
         public string Biography { get; set; }
         public DateTime DateOfBirth { get; set; }
+    }
+    
+    public class UserDTO
+    {
+        public int Id { get; set; }
+        public string UserName { get; set; }
+        public string Email { get; set; }
+    }
+
+    public class UserCreateDTO
+    {
+        [Required(ErrorMessage = "Username is required.")]
+        [StringLength(50, ErrorMessage = "Username cannot be longer than 50 characters.")]
+        public string UserName { get; set; }
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Invalid email address format.")]
+        public string Email { get; set; }
+        [Required(ErrorMessage = "Password is required.")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters long.")]
+        public string Password { get; set; }
+    }
+    
+    public class UserUpdateDTO
+    {
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
     }
 }

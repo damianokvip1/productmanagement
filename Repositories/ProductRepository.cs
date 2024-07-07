@@ -16,16 +16,9 @@ public interface IProductRepository
     Task<IEnumerable<ProductDTO>> GetProductsCheapestAsync();
 }
 
-public class ProductRepository : IProductRepository
+public class ProductRepository(ApplicationDbContext context) : IProductRepository
 {
     private const int CheapestProducts = 5;
-
-    private readonly ApplicationDbContext _context;
-
-    public ProductRepository(ApplicationDbContext context)
-    {
-        _context = context;
-    }
 
     public async Task<IEnumerable<ProductDTO>> GetProductsAsync(int? categoryId, int? authorId, string? searchTerm, int pageNumber, int pageSize)
     {
@@ -55,26 +48,26 @@ public class ProductRepository : IProductRepository
 
     public async Task<Product?> GetProductByIdAsync(int id)
     {
-        return await _context.Products.FindAsync(id);
+        return await context.Products.FindAsync(id);
     }
 
     public async Task<Product> CreateProductAsync(Product product)
     {
-        _context.Products.Add(product);
-        await _context.SaveChangesAsync();
+        context.Products.Add(product);
+        await context.SaveChangesAsync();
 
-        await _context.Entry(product).Reference(p => p.Category).LoadAsync();
-        await _context.Entry(product).Reference(p => p.Author).LoadAsync();
+        await context.Entry(product).Reference(p => p.Category).LoadAsync();
+        await context.Entry(product).Reference(p => p.Author).LoadAsync();
         
         return product;
     }
 
     public async Task<bool> UpdateProductAsync(Product product)
     {
-        _context.Entry(product).State = EntityState.Modified;
+        context.Entry(product).State = EntityState.Modified;
         try
         {
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
         catch (DbUpdateConcurrencyException)
@@ -83,31 +76,24 @@ public class ProductRepository : IProductRepository
             {
                 return false;
             }
-            else
-            {
-                throw;
-            }
+
+            throw;
         }
     }
 
     public async Task<bool> DeleteProductAsync(int id)
     {
-        var product = await _context.Products.FindAsync(id);
+        var product = await context.Products.FindAsync(id);
         if (product == null)
-        {
             return false;
-        }
 
-        _context.Products.Remove(product);
-        await _context.SaveChangesAsync();
+        context.Products.Remove(product);
+        await context.SaveChangesAsync();
         return true;
     }
 
-    private bool ProductExists(int id)
-    {
-        return _context.Products.Any(e => e.Id == id);
-    }
-    
+    private bool ProductExists(int id) => context.Products.Any(e => e.Id == id);
+
     public async Task<IEnumerable<ProductDTO>> GetProductsFullDataAsync()
     {
         var productsWithDetails = await GetProductsDetailsQuery().ToListAsync();
@@ -126,7 +112,7 @@ public class ProductRepository : IProductRepository
     
     private IQueryable<ProductDTO> GetProductsDetailsQuery()
     {
-        return _context.Products
+        return context.Products
             .Include(p => p.Category)
             .Include(p => p.Author)
             .Select(product => new ProductDTO

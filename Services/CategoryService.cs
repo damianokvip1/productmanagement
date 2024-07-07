@@ -13,18 +13,11 @@ namespace ProductManagement.Services
         Task<bool> DeleteCategoryAsync(int id);
     }
     
-    public class CategoryService : ICategoryService
+    public class CategoryService(ICategoryRepository categoryRepository) : ICategoryService
     {
-        private readonly ICategoryRepository _categoryRepository;
-
-        public CategoryService(ICategoryRepository categoryRepository)
-        {
-            _categoryRepository = categoryRepository;
-        }
-
         public async Task<IEnumerable<CategoryDTO>> GetAllCategoriesAsync()
         {
-            var categories = await _categoryRepository.GetCategoriesAsync();
+            var categories = await categoryRepository.GetCategoriesAsync();
             return categories.Select(c => new CategoryDTO
             {
                 Id = c.Id,
@@ -34,7 +27,7 @@ namespace ProductManagement.Services
 
         public async Task<CategoryDTO?> GetCategoryByIdAsync(int id)
         {
-            var category = await _categoryRepository.GetCategoryByIdAsync(id);
+            var category = await categoryRepository.GetCategoryByIdAsync(id);
             if (category == null)
             {
                 return null;
@@ -54,7 +47,7 @@ namespace ProductManagement.Services
                 Name = categoryCreateDto.Name
             };
 
-            await _categoryRepository.CreateCategoryAsync(category);
+            await categoryRepository.CreateCategoryAsync(category);
 
             return new CategoryDTO
             {
@@ -65,7 +58,7 @@ namespace ProductManagement.Services
 
         public async Task<bool> UpdateCategoryAsync(int id, CategoryUpdateDTO categoryUpdateDto)
         {
-            var category = await _categoryRepository.GetCategoryByIdAsync(id);
+            var category = await categoryRepository.GetCategoryByIdAsync(id);
             if (category == null)
             {
                 return false;
@@ -73,12 +66,12 @@ namespace ProductManagement.Services
 
             category.Name = categoryUpdateDto.Name;
 
-            return await _categoryRepository.UpdateCategoryAsync(category);
+            return await categoryRepository.UpdateCategoryAsync(category);
         }
 
         public async Task<bool> DeleteCategoryAsync(int id)
         {
-            return await _categoryRepository.DeleteCategoryAsync(id);
+            return await categoryRepository.DeleteCategoryAsync(id);
         }
     }
 }

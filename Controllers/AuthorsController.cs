@@ -6,25 +6,19 @@ namespace ProductManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthorsController : ControllerBase
+    public class AuthorsController(IAuthorService authorService) : ControllerBase
     {
-        private readonly IAuthorService _authorService;
-        public AuthorsController(IAuthorService authorService)
-        {
-            _authorService = authorService;
-        }
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AuthorDTO>>> GetAuthors()
         {
-            var authors = await _authorService.GetAllAuthorsAsync();
+            var authors = await authorService.GetAllAuthorsAsync();
             return Ok(authors);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<AuthorDTO>> GetAuthor(int id)
         {
-            var author = await _authorService.GetAuthorByIdAsync(id);
+            var author = await authorService.GetAuthorByIdAsync(id);
             if (author == null)
             {
                 return NotFound();
@@ -36,14 +30,14 @@ namespace ProductManagement.Controllers
         [HttpPost]
         public async Task<ActionResult<AuthorDTO>> PostAuthor(AuthorCreateDTO authorCreateDto)
         {
-            var author = await _authorService.CreateAuthorAsync(authorCreateDto);
+            var author = await authorService.CreateAuthorAsync(authorCreateDto);
             return CreatedAtAction(nameof(GetAuthor), new { id = author.Id }, author);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> PutAuthor(int id, AuthorUpdateDTO authorUpdateDto)
         {
-            if (!await _authorService.UpdateAuthorAsync(id, authorUpdateDto))
+            if (!await authorService.UpdateAuthorAsync(id, authorUpdateDto))
             {
                 return NotFound();
             }
@@ -51,10 +45,10 @@ namespace ProductManagement.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteAuthor(int id)
         {
-            if (!await _authorService.DeleteAuthorAsync(id))
+            if (!await authorService.DeleteAuthorAsync(id))
             {
                 return NotFound();
             }

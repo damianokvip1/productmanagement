@@ -13,38 +13,31 @@ namespace ProductManagement.Repositories
         Task<bool> DeleteAuthorAsync(int id);
     }
 
-    public class AuthorRepository : IAuthorRepository
+    public class AuthorRepository(ApplicationDbContext context) : IAuthorRepository
     {
-        private readonly ApplicationDbContext _context;
-
-        public AuthorRepository(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
         public async Task<IEnumerable<Author>> GetAuthorsAsync()
         {
-            return await _context.Authors.ToListAsync();
+            return await context.Authors.ToListAsync();
         }
 
         public async Task<Author?> GetAuthorByIdAsync(int id)
         {
-            return await _context.Authors.FindAsync(id);
+            return await context.Authors.FindAsync(id);
         }
 
         public async Task<Author> CreateAuthorAsync(Author author)
         {
-            _context.Authors.Add(author);
-            await _context.SaveChangesAsync();
+            context.Authors.Add(author);
+            await context.SaveChangesAsync();
             return author;
         }
 
         public async Task<bool> UpdateAuthorAsync(Author author)
         {
-            _context.Entry(author).State = EntityState.Modified;
+            context.Entry(author).State = EntityState.Modified;
             try
             {
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
                 return true;
             }
             catch (DbUpdateConcurrencyException)
@@ -62,20 +55,20 @@ namespace ProductManagement.Repositories
 
         public async Task<bool> DeleteAuthorAsync(int id)
         {
-            var author = await _context.Authors.FindAsync(id);
+            var author = await context.Authors.FindAsync(id);
             if (author == null)
             {
                 return false;
             }
 
-            _context.Authors.Remove(author);
-            await _context.SaveChangesAsync();
+            context.Authors.Remove(author);
+            await context.SaveChangesAsync();
             return true;
         }
 
         private bool AuthorExists(int id)
         {
-            return _context.Authors.Any(e => e.Id == id);
+            return context.Authors.Any(e => e.Id == id);
         }
     }
 }

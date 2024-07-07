@@ -6,61 +6,61 @@ namespace ProductManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductsController : ControllerBase
+    public class ProductsController(IProductService productService) : ControllerBase
     {
         private const int PageNumber = 1;
         private const int PageSize = 10;
 
-        private readonly IProductService _productService;
-
-        public ProductsController(IProductService productService)
-        {
-            _productService = productService;
-        }
-
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProducts(
+        public async Task<CustomResponseDto> GetProducts(
             [FromQuery] int? categoryId,
             [FromQuery] int? authorId,
             [FromQuery] string? searchTerm,
             [FromQuery] int pageNumber = PageNumber,
             [FromQuery] int pageSize = PageSize)
         {
-            var products = await _productService.GetProductsAsync(categoryId, authorId, searchTerm, pageNumber, pageSize);
-            return Ok(products);
+            var products = await productService.GetProductsAsync(categoryId, authorId, searchTerm, pageNumber, pageSize);
+            
+            return !products.Any()
+                ? new CustomResponseDto { StatusCode = 404, IsError = true, Message = "No products found matching the criteria.", Data = null }
+                : new CustomResponseDto { StatusCode = 200, IsError = false, Message = "Success!", Data = products };
         }
         
         [HttpGet("get-cheapest-products")]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetCheapestProducts()
+        public async Task<CustomResponseDto> GetCheapestProducts()
         {
-            var products = await _productService.GetCheapestProductsAsync();
-        
-            return Ok(products);
+            var products = await productService.GetCheapestProductsAsync();
+            return !products.Any()
+                ? new CustomResponseDto { StatusCode = 404, IsError = true, Message = "No products found matching the criteria.", Data = null }
+                : new CustomResponseDto { StatusCode = 200, IsError = false, Message = "Success!", Data = products };
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ProductDTO>> GetProduct(int id)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<CustomResponseDto>> GetProduct(int id)
         {
-            var product = await _productService.GetProductDetailAsync(id);
+            var product = await productService.GetProductDetailAsync(id);
             if (product == null)
             {
-                return NotFound();
+                return new CustomResponseDto
+                {
+                    StatusCode = 404, IsError = true, Message = "Not found product", Data = null
+                };
             }
 
-            return product;
+            return new CustomResponseDto { StatusCode = 200, IsError = false, Message = "Success!", Data = product };
         }
 
         [HttpPost]
         public async Task<ActionResult<ProductDTO>> PostProduct(ProductCreateDTO productCreateDto)
         {
-            var product = await _productService.CreateProductAsync(productCreateDto);
+            var product = await productService.CreateProductAsync(productCreateDto);
             return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> PutProduct(int id, ProductUpdateDTO productUpdateDto)
         {
-            if (!await _productService.UpdateProductAsync(id, productUpdateDto))
+            if (!await productService.UpdateProductAsync(id, productUpdateDto))
             {
                 return NotFound();
             }
@@ -68,10 +68,10 @@ namespace ProductManagement.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            if (!await _productService.DeleteProductAsync(id))
+            if (!await productService.DeleteProductAsync(id))
             {
                 return NotFound();
             }
