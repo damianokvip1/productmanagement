@@ -109,4 +109,29 @@ namespace ProductManagement.DTOs
         public string Email { get; set; }
         public string Password { get; set; }
     }
+    
+    public class Login
+    {
+        [Required]
+        public string UserName { get; set; }
+
+        [Required]
+        public string Password { get; set; }
+    }
+    
+    public class AuthResponse
+    {
+        public string Id { get; set; }
+        public string Username { get; set; }
+        public string Email { get; set; }
+        public string Token { get; set; }
+    }
+    
+    public class JwtSettings
+    {
+        public string Issuer { get; set; }
+        public string Audience { get; set; }
+        public string Key { get; set; }
+    }
+
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using ProductManagement.Data;
 using ProductManagement.Models;
 
@@ -12,9 +13,10 @@ namespace ProductManagement.Repositories
         Task<bool> UpdateUserAsync(User user);
         Task<bool> DeleteUserAsync(int id);
         Task<User?> GetUserByUserNameAsync(string userName);
+        Task<bool> ValidatePasswordAsync(User user, string password);
     }
 
-    public class UserRepository(ApplicationDbContext context) : IUserRepository
+    public class UserRepository(ApplicationDbContext context, IPasswordHasher<User> passwordHasher) : IUserRepository
     {
         public async Task<IEnumerable<User>> GetUsersAsync() => await context.Users.ToListAsync();
 
@@ -22,7 +24,13 @@ namespace ProductManagement.Repositories
 
         public async Task<User> CreateUserAsync(User user)
         {
-            context.Users.Add(user);
+            var data = new User
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                PasswordHash = passwordHasher.HashPassword(null, user.PasswordHash)
+            };
+            context.Users.Add(data);
             await context.SaveChangesAsync();
             return user;
         }
@@ -56,6 +64,12 @@ namespace ProductManagement.Repositories
         }
         
         public async Task<User?> GetUserByUserNameAsync(string userName) => await context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+
+        public Task<bool> ValidatePasswordAsync(User user, string password)
+        {
+            var verificationResult = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
+            return Task.FromResult(verificationResult == PasswordVerificationResult.Success);
+        }
 
         private bool UserExists(int id) => context.Users.Any(e => e.Id == id);
     }

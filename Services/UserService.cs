@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
 using ProductManagement.DTOs;
 using ProductManagement.Models;
 using ProductManagement.Repositories;
@@ -13,6 +14,8 @@ namespace ProductManagement.Services
         Task<UserDTO?> CreateUserAsync(UserCreateDTO userCreateDto);
         Task<bool> UpdateUserAsync(int id, UserUpdateDTO userUpdateDto);
         Task<bool> DeleteUserAsync(int id);
+        Task<bool> CheckPasswordAsync(User user, string password);
+        Task<User?> FindByUsernameAsync(string username);
     }
 
     public class UserService(IUserRepository userRepository) : IUserService
@@ -47,13 +50,12 @@ namespace ProductManagement.Services
             var existingUser = await userRepository.GetUserByUserNameAsync(userCreateDto.UserName);
             if (existingUser != null)
                 return null;
-            var hashedPassword = HashPassword(userCreateDto.Password);
 
             var user = new User
             {
                 UserName = userCreateDto.UserName,
                 Email = userCreateDto.Email,
-                PasswordHash = hashedPassword
+                PasswordHash = userCreateDto.Password
             };
 
             await userRepository.CreateUserAsync(user);
@@ -80,19 +82,15 @@ namespace ProductManagement.Services
         }
 
         public async Task<bool> DeleteUserAsync(int id) => await userRepository.DeleteUserAsync(id);
-
-        private static string HashPassword(string password)
+        
+        public async Task<bool> CheckPasswordAsync(User user, string password)
         {
-            var bytes = Encoding.UTF8.GetBytes(password);
-            var hashedBytes = SHA256.HashData(bytes);
-
-            var builder = new StringBuilder();
-            foreach (var b in hashedBytes)
-            {
-                builder.Append(b.ToString("x2"));
-            }
-            return builder.ToString();
+            return await userRepository.ValidatePasswordAsync(user, password);
         }
         
+        public async Task<User?> FindByUsernameAsync(string username)
+        {
+            return await userRepository.GetUserByUserNameAsync(username);
+        }
     }
 }
