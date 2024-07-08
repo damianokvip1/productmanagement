@@ -14,8 +14,7 @@ namespace ProductManagement.Services
         Task<UserDTO?> CreateUserAsync(UserCreateDTO userCreateDto);
         Task<bool> UpdateUserAsync(int id, UserUpdateDTO userUpdateDto);
         Task<bool> DeleteUserAsync(int id);
-        Task<bool> CheckPasswordAsync(User user, string password);
-        Task<User?> FindByUsernameAsync(string username);
+        Task<User?> ValidateCredentials(Login request);
     }
 
     public class UserService(IUserRepository userRepository) : IUserService
@@ -83,14 +82,24 @@ namespace ProductManagement.Services
 
         public async Task<bool> DeleteUserAsync(int id) => await userRepository.DeleteUserAsync(id);
         
-        public async Task<bool> CheckPasswordAsync(User user, string password)
+        private async Task<bool> CheckPasswordAsync(User user, string password)
         {
             return await userRepository.ValidatePasswordAsync(user, password);
         }
         
-        public async Task<User?> FindByUsernameAsync(string username)
+        private async Task<User?> FindByUsernameAsync(string username)
         {
             return await userRepository.GetUserByUserNameAsync(username);
         }
+
+        public async Task<User?> ValidateCredentials(Login request)
+        {
+            var user = await FindByUsernameAsync(request.UserName);
+            if (user == null || !await CheckPasswordAsync(user, request.Password))
+                return null;
+
+            return user;
+        }
+
     }
 }

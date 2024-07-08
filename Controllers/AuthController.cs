@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ProductManagement.DTOs;
 using ProductManagement.Helpers;
 using ProductManagement.Services;
 
@@ -10,19 +11,15 @@ public class AuthController(IUserService userService, JwtTokenGenerator jwtToken
     : ControllerBase
 {
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    public async Task<IActionResult> Login([FromBody] Login request)
     {
-        var user = await userService.FindByUsernameAsync(request.Username);
-        if (user == null || !await userService.CheckPasswordAsync(user, request.Password))
+        var user = await userService.ValidateCredentials(request);
+
+        if (user == null)
             return Unauthorized();
 
         var token = jwtTokenGenerator.GenerateToken(user);
+
         return Ok(new { Token = token });
     }
-}
-
-public class LoginRequest
-{
-    public string Username { get; set; }
-    public string Password { get; set; }
 }
