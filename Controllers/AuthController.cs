@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductManagement.DTOs;
 using ProductManagement.Helpers;
@@ -32,6 +33,7 @@ public class AuthController(IUserService userService, JwtTokenGenerator jwtToken
     }
     
     [HttpPost("change-password")]
+    [Authorize]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

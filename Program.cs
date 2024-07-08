@@ -45,7 +45,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 // Register repositories
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
