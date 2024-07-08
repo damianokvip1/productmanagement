@@ -1,0 +1,36 @@
+﻿INSERT INTO Authors (Name, Biography, DateOfBirth)
+VALUES ('William Shakespeare', 'The Bard of Avon, famous for plays like Hamlet and Romeo & Juliet.', '1564-04-23'),
+       ('Agatha Christie', 'Queen of Crime fiction, known for Hercule Poirot and Miss Marple mysteries.', '1890-09-15'),
+       ('J.R.R. Tolkien', 'Author of the epic fantasy series The Lord of the Rings.', '1775-12-16'),
+       ('Jane Austen', 'Known for witty social commentary in novels like Pride and Prejudice.', '1775-12-16'),
+       ('Isaac Asimov', 'Sci-fi author and one of the "Big Three" of science fiction.', '2000-07-06');
+
+INSERT INTO Categories (Name)
+VALUES ('Fiction'),
+       ('Mystery'),
+       ('Fantasy'),
+       ('Romance'),
+       ('Science Fiction');
+
+INSERT INTO Products (Name, Price, Description, CategoryId, AuthorId)
+VALUES
+    ('Hamlet', 19.99, 'A tragedy play by William Shakespeare', 1, 5),
+    ('Romeo & Juliet', 14.99, 'A romantic tragedy play by William Shakespeare', 1, 5),
+    ('Murder on the Orient Express', 9.99, 'A Hercule Poirot mystery novel by Agatha Christie', 2, 4),
+    ('The ABC Murders', 8.99, 'A Hercule Poirot mystery novel by Agatha Christie', 2, 4),
+    ('The Lord of the Rings: The Fellowship of the Ring', 12.99, 'The first volume of J.R.R. Tolkiens epic fantasy series', 3, 3),
+    ('The Lord of the Rings: The Two Towers', 12.99, 'The second volume of J.R.R. Tolkiens epic fantasy series', 3, 3),
+    ('Pride and Prejudice', 7.99, 'A classic novel of manners by Jane Austen', 4, 2),
+    ('Sense and Sensibility', 7.99, 'A novel by Jane Austen', 4, 2),
+    ('Foundation', 10.99, 'A science fiction novel by Isaac Asimov', 5, 1),
+    ('I, Robot', 11.99, 'A collection of science fiction short stories by Isaac Asimov', 5, 1),
+    ('Macbeth', 15.99, 'A tragedy play by William Shakespeare', 1, 5),
+    ('The Murder of Roger Ackroyd', 9.99, 'A Hercule Poirot mystery novel by Agatha Christie', 2, 4),
+    ('The Lord of the Rings: The Return of the King', 12.99, 'The third volume of J.R.R. Tolkiens epic fantasy series', 3, 3),
+    ('Emma', 7.99, 'A novel by Jane Austen', 4, 2),
+    ('Persuasion', 7.99, 'A novel by Jane Austen', 4, 2),
+    ('The Gods Themselves', 13.99, 'A science fiction novel by Isaac Asimov', 5, 1),
+    ('A Midsummer Nights Dream', 16.99, 'A comedy play by William Shakespeare', 1, 5),
+    ('The Secret Adversary', 8.99, 'A mystery novel by Agatha Christie', 2, 4),
+    ('The Silmarillion', 14.99, 'A collection of mythopoeic works by J.R.R. Tolkien', 3, 3),
+    ('Northanger Abbey', 7.99, 'A novel by Jane Austen', 4, 2);
