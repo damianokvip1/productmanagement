@@ -121,7 +121,7 @@ namespace ProductManagement.DTOs
     
     public class AuthResponse
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         public string Username { get; set; }
         public string Email { get; set; }
         public string Token { get; set; }
@@ -132,6 +132,12 @@ namespace ProductManagement.DTOs
         public string Issuer { get; set; }
         public string Audience { get; set; }
         public string Key { get; set; }
+    }
+    
+    public class ChangePasswordRequest
+    {
+        public string CurrentPassword { get; set; }
+        public string NewPassword { get; set; }
     }
 
 }

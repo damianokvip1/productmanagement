@@ -10,7 +10,7 @@ namespace ProductManagement.Repositories
         Task<IEnumerable<User>> GetUsersAsync();
         Task<User?> GetUserByIdAsync(int id);
         Task<User> CreateUserAsync(User user);
-        Task<bool> UpdateUserAsync(User user);
+        Task<bool> UpdateUserAsync(User user, string? newPassword = "");
         Task<bool> DeleteUserAsync(int id);
         Task<User?> GetUserByUserNameAsync(string userName);
         Task<bool> ValidatePasswordAsync(User user, string password);
@@ -35,8 +35,9 @@ namespace ProductManagement.Repositories
             return user;
         }
         
-        public async Task<bool> UpdateUserAsync(User user)
+        public async Task<bool> UpdateUserAsync(User user, string? newPassword = "")
         {
+            if (!String.IsNullOrEmpty(newPassword)) user.PasswordHash = passwordHasher.HashPassword(user, newPassword);
             context.Entry(user).State = EntityState.Modified;
             try
             {

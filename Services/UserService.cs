@@ -15,6 +15,7 @@ namespace ProductManagement.Services
         Task<bool> UpdateUserAsync(int id, UserUpdateDTO userUpdateDto);
         Task<bool> DeleteUserAsync(int id);
         Task<User?> ValidateCredentials(Login request);
+        Task<bool> ChangePasswordAsync(string id, string currentPassword, string newPassword);
     }
 
     public class UserService(IUserRepository userRepository) : IUserService
@@ -99,6 +100,18 @@ namespace ProductManagement.Services
                 return null;
 
             return user;
+        }
+        
+        public async Task<bool> ChangePasswordAsync(string id, string currentPassword, string newPassword)
+        {
+            var user = await userRepository.GetUserByIdAsync(int.Parse(id));
+            if (user == null) return false;
+
+            var validate = await CheckPasswordAsync(user, currentPassword);;
+            if (!validate) return false;
+
+            await userRepository.UpdateUserAsync(user, newPassword);
+            return true;
         }
 
     }
