@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductManagement.DTOs;
 using ProductManagement.Services;
@@ -55,14 +56,18 @@ namespace ProductManagement.Controllers
         [HttpPost]
         public async Task<ActionResult<ProductDTO>> PostProduct(ProductCreateDTO productCreateDto)
         {
-            var product = await productService.CreateProductAsync(productCreateDto);
+            var userCreateId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var product = await productService.CreateProductAsync(productCreateDto, int.Parse(userCreateId));
             return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
         }
 
         [HttpPut("{id:int}")]
         public async Task<IActionResult> PutProduct(int id, ProductUpdateDTO productUpdateDto)
         {
-            if (!await productService.UpdateProductAsync(id, productUpdateDto))
+            var userUpdateId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!await productService.UpdateProductAsync(id, productUpdateDto, int.Parse(userUpdateId)))
             {
                 return NotFound();
             }

@@ -8,8 +8,8 @@ namespace ProductManagement.Services
     {
         Task<IEnumerable<ProductDTO>> GetProductsAsync(int? categoryId, int? authorId, string? searchTerm, int pageNumber, int pageSize);
         Task<ProductDTO?> GetProductDetailAsync(int id);
-        Task<ProductDTO> CreateProductAsync(ProductCreateDTO productCreateDto);
-        Task<bool> UpdateProductAsync(int id, ProductUpdateDTO productUpdateDto);
+        Task<ProductDTO> CreateProductAsync(ProductCreateDTO productCreateDto, int userId);
+        Task<bool> UpdateProductAsync(int id, ProductUpdateDTO productUpdateDto, int userUpdateId);
         Task<bool> DeleteProductAsync(int id);
         Task<IEnumerable<ProductDTO>> GetCheapestProductsAsync();
     }
@@ -29,17 +29,18 @@ namespace ProductManagement.Services
             return product ?? null;
         }
         
-        public async Task<ProductDTO> CreateProductAsync(ProductCreateDTO productCreateDto)
+        public async Task<ProductDTO> CreateProductAsync(ProductCreateDTO productCreateDto, int userId)
         {
             ArgumentNullException.ThrowIfNull(productCreateDto);
-
             var product = new Product()
             {
                 Name = productCreateDto.Name,
                 Price = productCreateDto.Price,
                 Description = productCreateDto.Description,
                 CategoryId = productCreateDto.CategoryId,
-                AuthorId = productCreateDto.AuthorId
+                AuthorId = productCreateDto.AuthorId,
+                UserCreateId = userId,
+                UserUpdateId = null
             };  
 
             await productRepository.CreateProductAsync(product);
@@ -61,11 +62,11 @@ namespace ProductManagement.Services
                     Name = product.Author.Name,
                     Biography = product.Author.Biography,
                     DateOfBirth = product.Author.DateOfBirth
-                }
+                },
             };
         }
         
-        public async Task<bool> UpdateProductAsync(int id, ProductUpdateDTO productUpdateDto)
+        public async Task<bool> UpdateProductAsync(int id, ProductUpdateDTO productUpdateDto, int userUpdateId)
         {
             var product = await productRepository.GetProductByIdAsync(id);
             if (product == null)
@@ -79,6 +80,7 @@ namespace ProductManagement.Services
             product.Description = productUpdateDto.Description;
             product.CategoryId = productUpdateDto.CategoryId;
             product.AuthorId = productUpdateDto.AuthorId;
+            product.UserUpdateId = userUpdateId;
 
             return await productRepository.UpdateProductAsync(product);
         }

@@ -115,6 +115,8 @@ public class ProductRepository(ApplicationDbContext context) : IProductRepositor
         return context.Products
             .Include(p => p.Category)
             .Include(p => p.Author)
+            .Include(p => p.UserCreate)
+            .Include(p => p.UserUpdate)
             .Select(product => new ProductDTO
             {
                 Id = product.Id,
@@ -132,6 +134,18 @@ public class ProductRepository(ApplicationDbContext context) : IProductRepositor
                     Name = product.Author.Name,
                     Biography = product.Author.Biography,
                     DateOfBirth = product.Author.DateOfBirth
+                },
+                UserCreate = new UserDTO
+                {
+                    Id = product.UserCreate.Id,
+                    Email = product.UserCreate.Email,
+                    UserName = product.UserCreate.UserName
+                },
+                UserUpdate = new UserDTO
+                {
+                    Id = product.UserUpdate.Id,
+                    Email = product.UserUpdate.Email,
+                    UserName = product.UserUpdate.UserName
                 }
             });
     }

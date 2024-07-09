@@ -22,6 +22,27 @@ namespace ProductManagement.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ProductManagement.DTOs.UserDTO", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserDTO");
+                });
+
             modelBuilder.Entity("ProductManagement.Models.Author", b =>
                 {
                     b.Property<int>("Id")
@@ -92,11 +113,21 @@ namespace ProductManagement.Migrations
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
+                    b.Property<int?>("UserCreateId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserUpdateId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("UserCreateId");
+
+                    b.HasIndex("UserUpdateId");
 
                     b.ToTable("Products");
                 });
@@ -142,9 +173,21 @@ namespace ProductManagement.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ProductManagement.DTOs.UserDTO", "UserCreate")
+                        .WithMany()
+                        .HasForeignKey("UserCreateId");
+
+                    b.HasOne("ProductManagement.DTOs.UserDTO", "UserUpdate")
+                        .WithMany()
+                        .HasForeignKey("UserUpdateId");
+
                     b.Navigation("Author");
 
                     b.Navigation("Category");
+
+                    b.Navigation("UserCreate");
+
+                    b.Navigation("UserUpdate");
                 });
 
             modelBuilder.Entity("ProductManagement.Models.Author", b =>

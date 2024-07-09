@@ -41,6 +41,8 @@ namespace ProductManagement.DTOs
         public string Name { get; set; }
         public double Price { get; set; }
         public string Description { get; set; }
+        public UserDTO UserCreate { get; set; }
+        public UserDTO UserUpdate { get; set; }
         public CategoryDTO Category { get; set; }
         public AuthorDTO Author { get; set; }
     }
@@ -85,7 +87,7 @@ namespace ProductManagement.DTOs
     
     public class UserDTO
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }
     }
