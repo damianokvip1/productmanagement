@@ -9,14 +9,14 @@ namespace ProductManagement.Controllers
     public class UsersController(IUserService userService) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserDto.UserData>>> GetUsers()
         {
             var users = await userService.GetAllUsersAsync();
             return Ok(users);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<UserDTO>> GetUser(int id)
+        public async Task<ActionResult<UserDto.UserData>> GetUser(int id)
         {
             var user = await userService.GetUserByIdAsync(id);
             if (user == null)
@@ -28,14 +28,14 @@ namespace ProductManagement.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<UserDTO>> PostUser(UserCreateDTO userCreateDto)
+        public async Task<ActionResult<UserDto.UserData>> PostUser(UserDto.UserCreate userCreateDto)
         {
             var user = await userService.CreateUserAsync(userCreateDto);
             return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> PutUser(int id, UserUpdateDTO userUpdateDto)
+        public async Task<IActionResult> PutUser(int id, UserDto.UserUpdate userUpdateDto)
         {
             if (!await userService.UpdateUserAsync(id, userUpdateDto))
             {

@@ -9,14 +9,14 @@ namespace ProductManagement.Controllers
     public class CategoriesController(ICategoryService categoryService) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
+        public async Task<ActionResult<IEnumerable<CategoryDto.CategoryData>>> GetCategories()
         {
             var categories = await categoryService.GetAllCategoriesAsync();
             return Ok(categories);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<CategoryDTO>> GetCategory(int id)
+        public async Task<ActionResult<CategoryDto.CategoryData>> GetCategory(int id)
         {
             var category = await categoryService.GetCategoryByIdAsync(id);
             if (category == null)
@@ -26,14 +26,14 @@ namespace ProductManagement.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<CategoryDTO>> PostCategory(CategoryCreateDTO categoryCreateDto)
+        public async Task<ActionResult<CategoryDto.CategoryData>> PostCategory(CategoryDto.CategoryCreate categoryCreateDto)
         {
             var category = await categoryService.CreateCategoryAsync(categoryCreateDto);
             return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category);
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> PutCategory(int id, CategoryUpdateDTO categoryUpdateDto)
+        public async Task<IActionResult> PutCategory(int id, CategoryDto.CategoryUpdate categoryUpdateDto)
         {
             if (!await categoryService.UpdateCategoryAsync(id, categoryUpdateDto))
                 return NotFound();

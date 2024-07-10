@@ -7,20 +7,20 @@ namespace ProductManagement.Repositories;
 
 public interface IProductRepository
 {
-    Task<IEnumerable<ProductDTO>> GetProductsAsync(int? categoryId, int? authorId, string? searchTerm, int pageNumber, int pageSize);
-    Task<IEnumerable<ProductDTO>> GetProductsFullDataAsync();
+    Task<IEnumerable<ProductDto.ProductData>> GetProductsAsync(int? categoryId, int? authorId, string? searchTerm, int pageNumber, int pageSize);
+    Task<IEnumerable<ProductDto.ProductData>> GetProductsFullDataAsync();
     Task<Product?> GetProductByIdAsync(int id);
     Task<Product> CreateProductAsync(Product product);
     Task<bool> UpdateProductAsync(Product product);
     Task<bool> DeleteProductAsync(int id);
-    Task<IEnumerable<ProductDTO>> GetProductsCheapestAsync();
+    Task<IEnumerable<ProductDto.ProductData>> GetProductsCheapestAsync();
 }
 
 public class ProductRepository(ApplicationDbContext context) : IProductRepository
 {
     private const int CheapestProducts = 5;
 
-    public async Task<IEnumerable<ProductDTO>> GetProductsAsync(int? categoryId, int? authorId, string? searchTerm, int pageNumber, int pageSize)
+    public async Task<IEnumerable<ProductDto.ProductData>> GetProductsAsync(int? categoryId, int? authorId, string? searchTerm, int pageNumber, int pageSize)
     {
         var query = GetProductsDetailsQuery();
 
@@ -94,13 +94,13 @@ public class ProductRepository(ApplicationDbContext context) : IProductRepositor
 
     private bool ProductExists(int id) => context.Products.Any(e => e.Id == id);
 
-    public async Task<IEnumerable<ProductDTO>> GetProductsFullDataAsync()
+    public async Task<IEnumerable<ProductDto.ProductData>> GetProductsFullDataAsync()
     {
         var productsWithDetails = await GetProductsDetailsQuery().ToListAsync();
         return productsWithDetails;
     }
     
-    public async Task<IEnumerable<ProductDTO>> GetProductsCheapestAsync()
+    public async Task<IEnumerable<ProductDto.ProductData>> GetProductsCheapestAsync()
     {
         var cheapestProducts = await GetProductsDetailsQuery()
             .OrderBy(product => product.Price)
@@ -110,38 +110,38 @@ public class ProductRepository(ApplicationDbContext context) : IProductRepositor
         return cheapestProducts;
     }
     
-    private IQueryable<ProductDTO> GetProductsDetailsQuery()
+    private IQueryable<ProductDto.ProductData> GetProductsDetailsQuery()
     {
         return context.Products
             .Include(p => p.Category)
             .Include(p => p.Author)
             .Include(p => p.UserCreate)
             .Include(p => p.UserUpdate)
-            .Select(product => new ProductDTO
+            .Select(product => new ProductDto.ProductData
             {
                 Id = product.Id,
                 Name = product.Name,
                 Price = product.Price,
                 Description = product.Description,
-                Category = new CategoryDTO
+                Category = new CategoryDto.CategoryData
                 {
                     Id = product.Category.Id,
                     Name = product.Category.Name
                 },
-                Author = new AuthorDTO
+                Author = new AuthorDto.AuthorData
                 {
                     Id = product.Author.Id,
                     Name = product.Author.Name,
                     Biography = product.Author.Biography,
                     DateOfBirth = product.Author.DateOfBirth
                 },
-                UserCreate = new UserDTO
+                UserCreate = new UserDto.UserData
                 {
                     Id = product.UserCreate.Id,
                     Email = product.UserCreate.Email,
                     UserName = product.UserCreate.UserName
                 },
-                UserUpdate = new UserDTO
+                UserUpdate = new UserDto.UserData
                 {
                     Id = product.UserUpdate.Id,
                     Email = product.UserUpdate.Email,

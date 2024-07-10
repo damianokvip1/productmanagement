@@ -6,26 +6,26 @@ namespace ProductManagement.Services
 {
     public interface ICategoryService
     {
-        Task<IEnumerable<CategoryDTO>> GetAllCategoriesAsync();
-        Task<CategoryDTO?> GetCategoryByIdAsync(int id);
-        Task<CategoryDTO> CreateCategoryAsync(CategoryCreateDTO categoryCreateDto);
-        Task<bool> UpdateCategoryAsync(int id, CategoryUpdateDTO categoryUpdateDto);
+        Task<IEnumerable<CategoryDto.CategoryData>> GetAllCategoriesAsync();
+        Task<CategoryDto.CategoryData?> GetCategoryByIdAsync(int id);
+        Task<CategoryDto.CategoryData> CreateCategoryAsync(CategoryDto.CategoryCreate categoryCreateDto);
+        Task<bool> UpdateCategoryAsync(int id, CategoryDto.CategoryUpdate categoryUpdateDto);
         Task<bool> DeleteCategoryAsync(int id);
     }
     
     public class CategoryService(ICategoryRepository categoryRepository) : ICategoryService
     {
-        public async Task<IEnumerable<CategoryDTO>> GetAllCategoriesAsync()
+        public async Task<IEnumerable<CategoryDto.CategoryData>> GetAllCategoriesAsync()
         {
             var categories = await categoryRepository.GetCategoriesAsync();
-            return categories.Select(c => new CategoryDTO
+            return categories.Select(c => new CategoryDto.CategoryData
             {
                 Id = c.Id,
                 Name = c.Name
             });
         }
 
-        public async Task<CategoryDTO?> GetCategoryByIdAsync(int id)
+        public async Task<CategoryDto.CategoryData?> GetCategoryByIdAsync(int id)
         {
             var category = await categoryRepository.GetCategoryByIdAsync(id);
             if (category == null)
@@ -33,14 +33,14 @@ namespace ProductManagement.Services
                 return null;
             }
 
-            return new CategoryDTO
+            return new CategoryDto.CategoryData
             {
                 Id = category.Id,
                 Name = category.Name
             };
         }
 
-        public async Task<CategoryDTO> CreateCategoryAsync(CategoryCreateDTO categoryCreateDto)
+        public async Task<CategoryDto.CategoryData> CreateCategoryAsync(CategoryDto.CategoryCreate categoryCreateDto)
         {
             var category = new Category
             {
@@ -49,14 +49,14 @@ namespace ProductManagement.Services
 
             await categoryRepository.CreateCategoryAsync(category);
 
-            return new CategoryDTO
+            return new CategoryDto.CategoryData
             {
                 Id = category.Id,
                 Name = category.Name
             };
         }
 
-        public async Task<bool> UpdateCategoryAsync(int id, CategoryUpdateDTO categoryUpdateDto)
+        public async Task<bool> UpdateCategoryAsync(int id, CategoryDto.CategoryUpdate categoryUpdateDto)
         {
             var category = await categoryRepository.GetCategoryByIdAsync(id);
             if (category == null)

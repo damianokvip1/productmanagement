@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using ProductManagement.DTOs;
 using ProductManagement.Models;
 
-namespace ProductManagement.Helpers;
+namespace ProductManagement.Utils;
 
 public class JwtTokenGenerator(IOptions<JwtSettings> jwtSettings)
 {

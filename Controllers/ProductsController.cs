@@ -8,7 +8,6 @@ namespace ProductManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class ProductsController(IProductService productService) : ControllerBase
     {
         private const int PageNumber = 1;
@@ -54,7 +53,8 @@ namespace ProductManagement.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ProductDTO>> PostProduct(ProductCreateDTO productCreateDto)
+        [Authorize]
+        public async Task<ActionResult<ProductDto.ProductData>> PostProduct(ProductDto.ProductCreate productCreateDto)
         {
             var userCreateId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -63,7 +63,8 @@ namespace ProductManagement.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> PutProduct(int id, ProductUpdateDTO productUpdateDto)
+        [Authorize]
+        public async Task<IActionResult> PutProduct(int id, ProductDto.ProductUpdate productUpdateDto)
         {
             var userUpdateId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 

@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductManagement.DTOs;
-using ProductManagement.Helpers;
 using ProductManagement.Services;
+using ProductManagement.Utils;
 
 namespace ProductManagement.Controllers;
 
@@ -13,7 +13,7 @@ public class AuthController(IUserService userService, JwtTokenGenerator jwtToken
     : ControllerBase
 {
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] Login request)
+    public async Task<IActionResult> Login([FromBody] AuthDto.Login request)
     {
         var user = await userService.ValidateCredentials(request);
 
@@ -22,7 +22,7 @@ public class AuthController(IUserService userService, JwtTokenGenerator jwtToken
 
         var token = jwtTokenGenerator.GenerateToken(user);
 
-        var value = new AuthResponse
+        var value = new AuthDto.AuthResponse
         {
             Token = token,
             Id = user.Id,
@@ -34,12 +34,15 @@ public class AuthController(IUserService userService, JwtTokenGenerator jwtToken
     
     [HttpPost("change-password")]
     [Authorize]
-    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    public async Task<IActionResult> ChangePassword([FromBody] AuthDto.ChangePasswordRequest request)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (userId == null)
-            return Unauthorized("Invalid token");
+            return Unauthorized(new
+            {
+                message = "Successfully!"
+            });
 
         if (await userService.ChangePasswordAsync(userId, request.CurrentPassword, request.NewPassword))
             return Ok(new

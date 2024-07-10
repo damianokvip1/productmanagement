@@ -6,22 +6,22 @@ namespace ProductManagement.Services
 {
     public interface IProductService
     {
-        Task<IEnumerable<ProductDTO>> GetProductsAsync(int? categoryId, int? authorId, string? searchTerm, int pageNumber, int pageSize);
-        Task<ProductDTO?> GetProductDetailAsync(int id);
-        Task<ProductDTO> CreateProductAsync(ProductCreateDTO productCreateDto, int userId);
-        Task<bool> UpdateProductAsync(int id, ProductUpdateDTO productUpdateDto, int userUpdateId);
+        Task<IEnumerable<ProductDto.ProductData>> GetProductsAsync(int? categoryId, int? authorId, string? searchTerm, int pageNumber, int pageSize);
+        Task<ProductDto.ProductData?> GetProductDetailAsync(int id);
+        Task<ProductDto.ProductData> CreateProductAsync(ProductDto.ProductCreate productCreateDto, int userId);
+        Task<bool> UpdateProductAsync(int id, ProductDto.ProductUpdate productUpdateDto, int userUpdateId);
         Task<bool> DeleteProductAsync(int id);
-        Task<IEnumerable<ProductDTO>> GetCheapestProductsAsync();
+        Task<IEnumerable<ProductDto.ProductData>> GetCheapestProductsAsync();
     }
 
     public class ProductService(IProductRepository productRepository) : IProductService
     {
-        public Task<IEnumerable<ProductDTO>> GetProductsAsync(int? categoryId, int? authorId, string? searchTerm, int pageNumber, int pageSize)
+        public Task<IEnumerable<ProductDto.ProductData>> GetProductsAsync(int? categoryId, int? authorId, string? searchTerm, int pageNumber, int pageSize)
         {
             return productRepository.GetProductsAsync(categoryId, authorId, searchTerm, pageNumber, pageSize);
         }
 
-        public async Task<ProductDTO?> GetProductDetailAsync(int id)
+        public async Task<ProductDto.ProductData?> GetProductDetailAsync(int id)
         {
             var products = await productRepository.GetProductsFullDataAsync();
             var product = products.FirstOrDefault(p => p.Id == id);
@@ -29,7 +29,7 @@ namespace ProductManagement.Services
             return product ?? null;
         }
         
-        public async Task<ProductDTO> CreateProductAsync(ProductCreateDTO productCreateDto, int userId)
+        public async Task<ProductDto.ProductData> CreateProductAsync(ProductDto.ProductCreate productCreateDto, int userId)
         {
             ArgumentNullException.ThrowIfNull(productCreateDto);
             var product = new Product()
@@ -45,18 +45,18 @@ namespace ProductManagement.Services
 
             await productRepository.CreateProductAsync(product);
 
-            return new ProductDTO
+            return new ProductDto.ProductData
             {
                 Id = product.Id,
                 Name = product.Name,
                 Price = product.Price,
                 Description = product.Description,
-                Category = new CategoryDTO
+                Category = new CategoryDto.CategoryData
                 {
                     Id = product.Category.Id,
                     Name = product.Category.Name
                 },
-                Author = new AuthorDTO
+                Author = new AuthorDto.AuthorData
                 {
                     Id = product.Author.Id,
                     Name = product.Author.Name,
@@ -66,7 +66,7 @@ namespace ProductManagement.Services
             };
         }
         
-        public async Task<bool> UpdateProductAsync(int id, ProductUpdateDTO productUpdateDto, int userUpdateId)
+        public async Task<bool> UpdateProductAsync(int id, ProductDto.ProductUpdate productUpdateDto, int userUpdateId)
         {
             var product = await productRepository.GetProductByIdAsync(id);
             if (product == null)
@@ -90,22 +90,22 @@ namespace ProductManagement.Services
             return await productRepository.DeleteProductAsync(id);
         }
 
-        public async Task<IEnumerable<ProductDTO>> GetCheapestProductsAsync()
+        public async Task<IEnumerable<ProductDto.ProductData>> GetCheapestProductsAsync()
         {
             var cheapestProducts = await productRepository.GetProductsCheapestAsync();
             return cheapestProducts
-                .Select(product => new ProductDTO
+                .Select(product => new ProductDto.ProductData
                 {
                     Id = product.Id,
                     Name = product.Name,
                     Price = product.Price,
                     Description = product.Description,
-                    Category = new CategoryDTO
+                    Category = new CategoryDto.CategoryData
                     {
                         Id = product.Category.Id,
                         Name = product.Category.Name
                     },
-                    Author = new AuthorDTO
+                    Author = new AuthorDto.AuthorData
                     {
                         Id = product.Author.Id,
                         Name = product.Author.Name,

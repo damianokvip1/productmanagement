@@ -6,19 +6,19 @@ namespace ProductManagement.Services
 {
     public interface IAuthorService
     {
-        Task<IEnumerable<AuthorDTO>> GetAllAuthorsAsync();
-        Task<AuthorDTO?> GetAuthorByIdAsync(int id);
-        Task<AuthorDTO> CreateAuthorAsync(AuthorCreateDTO authorCreateDto);
-        Task<bool> UpdateAuthorAsync(int id, AuthorUpdateDTO authorUpdateDto);
+        Task<IEnumerable<AuthorDto.AuthorData>> GetAllAuthorsAsync();
+        Task<AuthorDto.AuthorData?> GetAuthorByIdAsync(int id);
+        Task<AuthorDto.AuthorData> CreateAuthorAsync(AuthorDto.AuthorCreateDTO authorCreateDto);
+        Task<bool> UpdateAuthorAsync(int id, AuthorDto.AuthorUpdateDTO authorUpdateDto);
         Task<bool> DeleteAuthorAsync(int id);
     }
 
     public class AuthorService(IAuthorRepository authorRepository) : IAuthorService
     {
-        public async Task<IEnumerable<AuthorDTO>> GetAllAuthorsAsync()
+        public async Task<IEnumerable<AuthorDto.AuthorData>> GetAllAuthorsAsync()
         {
             var authors = await authorRepository.GetAuthorsAsync();
-            return authors.Select(a => new AuthorDTO
+            return authors.Select(a => new AuthorDto.AuthorData
             {
                 Id = a.Id,
                 Name = a.Name,
@@ -27,7 +27,7 @@ namespace ProductManagement.Services
             });
         }
 
-        public async Task<AuthorDTO?> GetAuthorByIdAsync(int id)
+        public async Task<AuthorDto.AuthorData?> GetAuthorByIdAsync(int id)
         {
             var author = await authorRepository.GetAuthorByIdAsync(id);
             if (author == null)
@@ -35,7 +35,7 @@ namespace ProductManagement.Services
                 return null;
             }
 
-            return new AuthorDTO
+            return new AuthorDto.AuthorData
             {
                 Id = author.Id,
                 Name = author.Name,
@@ -44,7 +44,7 @@ namespace ProductManagement.Services
             };
         }
 
-        public async Task<AuthorDTO> CreateAuthorAsync(AuthorCreateDTO authorCreateDto)
+        public async Task<AuthorDto.AuthorData> CreateAuthorAsync(AuthorDto.AuthorCreateDTO authorCreateDto)
         {
             var author = new Author
             {
@@ -55,7 +55,7 @@ namespace ProductManagement.Services
 
             await authorRepository.CreateAuthorAsync(author);
 
-            return new AuthorDTO
+            return new AuthorDto.AuthorData
             {
                 Id = author.Id,
                 Name = author.Name,
@@ -64,7 +64,7 @@ namespace ProductManagement.Services
             };
         }
 
-        public async Task<bool> UpdateAuthorAsync(int id, AuthorUpdateDTO authorUpdateDto)
+        public async Task<bool> UpdateAuthorAsync(int id, AuthorDto.AuthorUpdateDTO authorUpdateDto)
         {
             var author = await authorRepository.GetAuthorByIdAsync(id);
             if (author == null)

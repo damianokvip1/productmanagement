@@ -9,21 +9,21 @@ namespace ProductManagement.Services
 {
     public interface IUserService
     {
-        Task<IEnumerable<UserDTO>> GetAllUsersAsync();
-        Task<UserDTO?> GetUserByIdAsync(int id);
-        Task<UserDTO?> CreateUserAsync(UserCreateDTO userCreateDto);
-        Task<bool> UpdateUserAsync(int id, UserUpdateDTO userUpdateDto);
+        Task<IEnumerable<UserDto.UserData>> GetAllUsersAsync();
+        Task<UserDto.UserData?> GetUserByIdAsync(int id);
+        Task<UserDto.UserData?> CreateUserAsync(UserDto.UserCreate userCreateDto);
+        Task<bool> UpdateUserAsync(int id, UserDto.UserUpdate userUpdateDto);
         Task<bool> DeleteUserAsync(int id);
-        Task<User?> ValidateCredentials(Login request);
+        Task<User?> ValidateCredentials(AuthDto.Login request);
         Task<bool> ChangePasswordAsync(string id, string currentPassword, string newPassword);
     }
 
     public class UserService(IUserRepository userRepository) : IUserService
     {
-        public async Task<IEnumerable<UserDTO>> GetAllUsersAsync()
+        public async Task<IEnumerable<UserDto.UserData>> GetAllUsersAsync()
         {
             var users = await userRepository.GetUsersAsync();
-            return users.Select(u => new UserDTO
+            return users.Select(u => new UserDto.UserData
             {
                 Id = u.Id,
                 Email = u.Email,
@@ -31,13 +31,13 @@ namespace ProductManagement.Services
             });
         }
 
-        public async Task<UserDTO?> GetUserByIdAsync(int id)
+        public async Task<UserDto.UserData?> GetUserByIdAsync(int id)
         {
             var user = await userRepository.GetUserByIdAsync(id);
             if (user == null)
                 return null;
 
-            return new UserDTO
+            return new UserDto.UserData
             {
                 Id = user.Id,
                 Email = user.Email,
@@ -45,7 +45,7 @@ namespace ProductManagement.Services
             };
         }
 
-        public async Task<UserDTO?> CreateUserAsync(UserCreateDTO userCreateDto)
+        public async Task<UserDto.UserData?> CreateUserAsync(UserDto.UserCreate userCreateDto)
         {
             var existingUser = await userRepository.GetUserByUserNameAsync(userCreateDto.UserName);
             if (existingUser != null)
@@ -60,7 +60,7 @@ namespace ProductManagement.Services
 
             await userRepository.CreateUserAsync(user);
 
-            return new UserDTO
+            return new UserDto.UserData
             {
                 Id = user.Id,
                 UserName = user.UserName,
@@ -68,7 +68,7 @@ namespace ProductManagement.Services
             };
         }
 
-        public async Task<bool> UpdateUserAsync(int id, UserUpdateDTO userUpdateDto)
+        public async Task<bool> UpdateUserAsync(int id, UserDto.UserUpdate userUpdateDto)
         {
             var user = await userRepository.GetUserByIdAsync(id);
             if (user == null)
@@ -93,7 +93,7 @@ namespace ProductManagement.Services
             return await userRepository.GetUserByUserNameAsync(username);
         }
 
-        public async Task<User?> ValidateCredentials(Login request)
+        public async Task<User?> ValidateCredentials(AuthDto.Login request)
         {
             var user = await FindByUsernameAsync(request.UserName);
             if (user == null || !await CheckPasswordAsync(user, request.Password))

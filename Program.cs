@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ProductManagement.DTOs;
-using ProductManagement.Helpers;
 using ProductManagement.Models;
+using ProductManagement.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
