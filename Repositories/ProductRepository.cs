@@ -112,41 +112,45 @@ public class ProductRepository(ApplicationDbContext context) : IProductRepositor
     
     private IQueryable<ProductDto.ProductData> GetProductsDetailsQuery()
     {
-        return context.Products
-            .Include(p => p.Category)
-            .Include(p => p.Author)
-            .Include(p => p.UserCreate)
-            .Include(p => p.UserUpdate)
-            .Select(product => new ProductDto.ProductData
+        return from product in context.Products
+            join category in context.Categories on product.CategoryId equals category.Id into categoryGroup
+            from category in categoryGroup.DefaultIfEmpty()
+            join author in context.Authors on product.AuthorId equals author.Id into authorGroup
+            from author in authorGroup.DefaultIfEmpty()
+            join userCreate in context.Users on product.UserCreateId equals userCreate.Id into userCreateGroup
+            from userCreate in userCreateGroup.DefaultIfEmpty()
+            join userUpdate in context.Users on product.UserUpdateId equals userUpdate.Id into userUpdateGroup
+            from userUpdate in userUpdateGroup.DefaultIfEmpty()
+            select new ProductDto.ProductData
             {
                 Id = product.Id,
                 Name = product.Name,
                 Price = product.Price,
                 Description = product.Description,
-                Category = new CategoryDto.CategoryData
+                Category = category == null ? null : new CategoryDto.CategoryData
                 {
-                    Id = product.Category.Id,
-                    Name = product.Category.Name
+                    Id = category.Id,
+                    Name = category.Name
                 },
-                Author = new AuthorDto.AuthorData
+                Author = author == null ? null : new AuthorDto.AuthorData
                 {
-                    Id = product.Author.Id,
-                    Name = product.Author.Name,
-                    Biography = product.Author.Biography,
-                    DateOfBirth = product.Author.DateOfBirth
+                    Id = author.Id,
+                    Name = author.Name,
+                    Biography = author.Biography,
+                    DateOfBirth = author.DateOfBirth
                 },
-                UserCreate = new UserDto.UserData
+                UserCreate = userCreate == null ? null : new UserDto.UserData
                 {
-                    Id = product.UserCreate.Id,
-                    Email = product.UserCreate.Email,
-                    UserName = product.UserCreate.UserName
+                    Id = userCreate.Id,
+                    Email = userCreate.Email,
+                    UserName = userCreate.UserName
                 },
-                UserUpdate = new UserDto.UserData
+                UserUpdate = userUpdate == null ? null : new UserDto.UserData
                 {
-                    Id = product.UserUpdate.Id,
-                    Email = product.UserUpdate.Email,
-                    UserName = product.UserUpdate.UserName
+                    Id = userUpdate.Id,
+                    Email = userUpdate.Email,
+                    UserName = userUpdate.UserName
                 }
-            });
+            };
     }
 }
